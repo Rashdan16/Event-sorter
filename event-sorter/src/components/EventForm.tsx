@@ -1,26 +1,58 @@
+/**
+ * EventForm Component
+ *
+ * A reusable form component for creating and editing events.
+ * Used on both the upload page (create new event) and event detail page (edit existing event).
+ *
+ * Features:
+ * - Displays event poster image (if available)
+ * - Input fields for all event details (name, date, time, location, etc.)
+ * - Form validation (required fields marked with *)
+ * - Submit button with loading state
+ * - Optional "Add to Calendar" button for Google Calendar integration
+ *
+ * This is a client component because it manages form state and handles user input.
+ */
+
 "use client";
 
 import { useState } from "react";
 import { ExtractedEventData } from "@/types";
 
+/**
+ * Props for the EventForm component
+ */
 interface EventFormProps {
-  initialData?: ExtractedEventData;
-  imageUrl?: string;
-  onSubmit: (data: EventFormData) => Promise<void>;
-  onAddToCalendar?: () => Promise<void>;
-  isInCalendar?: boolean;
-  isSubmitting?: boolean;
+  initialData?: ExtractedEventData;           // Pre-fill form with extracted/existing data
+  imageUrl?: string;                          // URL of event poster image to display
+  onSubmit: (data: EventFormData) => Promise<void>;  // Called when form is submitted
+  onAddToCalendar?: () => Promise<void>;      // Optional: Called when "Add to Calendar" clicked
+  isInCalendar?: boolean;                     // Whether event is already in Google Calendar
+  isSubmitting?: boolean;                     // Show loading state on submit button
 }
 
+/**
+ * Shape of form data submitted by this component
+ */
 interface EventFormData {
-  name: string;
-  description: string;
-  location: string;
-  date: string;
-  time: string;
-  ticketUrl: string;
+  name: string;        // Event name (required)
+  description: string; // Event description
+  location: string;    // Event venue/location
+  date: string;       // Event date in YYYY-MM-DD format (required)
+  time: string;       // Event time in HH:MM format
+  ticketUrl: string;  // URL for ticket purchase
 }
 
+/**
+ * EventForm Component
+ *
+ * @param initialData - Pre-populated data (from AI extraction or existing event)
+ * @param imageUrl - Event poster image URL
+ * @param onSubmit - Async function called with form data on submit
+ * @param onAddToCalendar - Optional async function to add event to Google Calendar
+ * @param isInCalendar - Whether the event is already synced to calendar
+ * @param isSubmitting - External loading state for submit button
+ */
 export default function EventForm({
   initialData,
   imageUrl,
@@ -29,6 +61,7 @@ export default function EventForm({
   isInCalendar,
   isSubmitting,
 }: EventFormProps) {
+  // Form state - initialized with provided data or empty strings
   const [formData, setFormData] = useState<EventFormData>({
     name: initialData?.name || "",
     description: initialData?.description || "",
@@ -38,20 +71,34 @@ export default function EventForm({
     ticketUrl: initialData?.ticketUrl || "",
   });
 
+  // Loading state for the "Add to Calendar" button
   const [addingToCalendar, setAddingToCalendar] = useState(false);
 
+  /**
+   * Handle changes to any form input
+   * Uses the input's name attribute to update the correct field
+   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    // Update only the changed field, keep others unchanged
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * Handle form submission
+   * Prevents default form behavior and calls the provided onSubmit function
+   */
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent page reload
     await onSubmit(formData);
   };
 
+  /**
+   * Handle "Add to Calendar" button click
+   * Manages loading state and calls the provided callback
+   */
   const handleAddToCalendar = async () => {
     if (!onAddToCalendar) return;
     setAddingToCalendar(true);
@@ -64,6 +111,7 @@ export default function EventForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Event poster image preview (if available) */}
       {imageUrl && (
         <div className="mb-6">
           <img
@@ -74,6 +122,7 @@ export default function EventForm({
         </div>
       )}
 
+      {/* Event Name field (required) */}
       <div>
         <label
           htmlFor="name"
@@ -92,7 +141,9 @@ export default function EventForm({
         />
       </div>
 
+      {/* Date and Time fields in a 2-column grid */}
       <div className="grid grid-cols-2 gap-4">
+        {/* Date field (required) */}
         <div>
           <label
             htmlFor="date"
@@ -110,6 +161,8 @@ export default function EventForm({
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
+
+        {/* Time field (optional) */}
         <div>
           <label
             htmlFor="time"
@@ -128,6 +181,7 @@ export default function EventForm({
         </div>
       </div>
 
+      {/* Location field (optional) */}
       <div>
         <label
           htmlFor="location"
@@ -145,6 +199,7 @@ export default function EventForm({
         />
       </div>
 
+      {/* Ticket URL field (optional) */}
       <div>
         <label
           htmlFor="ticketUrl"
@@ -163,6 +218,7 @@ export default function EventForm({
         />
       </div>
 
+      {/* Description field (optional, multiline) */}
       <div>
         <label
           htmlFor="description"
@@ -180,7 +236,9 @@ export default function EventForm({
         />
       </div>
 
+      {/* Action buttons row */}
       <div className="flex gap-3">
+        {/* Save/Submit button */}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -189,6 +247,7 @@ export default function EventForm({
           {isSubmitting ? "Saving..." : "Save Event"}
         </button>
 
+        {/* Add to Calendar button (only shown if callback provided) */}
         {onAddToCalendar && (
           <button
             type="button"
@@ -200,7 +259,9 @@ export default function EventForm({
                 : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
+            {/* Button content changes based on state */}
             {isInCalendar ? (
+              // Already in calendar - show checkmark
               <>
                 <svg
                   className="w-5 h-5"
@@ -218,11 +279,13 @@ export default function EventForm({
                 In Calendar
               </>
             ) : addingToCalendar ? (
+              // Currently adding - show spinner
               <>
                 <div className="w-4 h-4 border-2 border-gray-600 dark:border-gray-300 border-t-transparent rounded-full animate-spin" />
                 Adding...
               </>
             ) : (
+              // Default state - show calendar icon
               <>
                 <svg
                   className="w-5 h-5"

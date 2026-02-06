@@ -1,3 +1,24 @@
+/**
+ * Home Page Component
+ *
+ * The main landing page of the Event Sorter application.
+ * Displays different views based on authentication status:
+ * - Unauthenticated: Marketing landing page with feature highlights
+ * - Authenticated: User's event dashboard with search, filter, and selection capabilities
+ *
+ * Features:
+ * - Event grid display separated into "Upcoming" and "Past" sections
+ * - Search functionality (by name, location, description)
+ * - Time-based filtering (Today, This Week, Next Week, This Month)
+ * - Selection mode for bulk deletion
+ * - Responsive grid layout
+ *
+ * This is a client component because it:
+ * - Uses hooks (useSession, useState, useEffect, useMemo)
+ * - Handles user interactions (search, filter, selection)
+ * - Manages dynamic state
+ */
+
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -5,6 +26,10 @@ import { useEffect, useState, useMemo } from "react";
 import EventCard from "@/components/EventCard";
 import Link from "next/link";
 
+/**
+ * Event interface for type safety
+ * Matches the Prisma Event model structure
+ */
 interface Event {
   id: string;
   name: string;
@@ -14,19 +39,51 @@ interface Event {
   time?: string | null;
   ticketUrl?: string | null;
   imageUrl?: string | null;
-  googleEventId?: string | null;
+  googleEventId?: string | null; // Present if synced to Google Calendar
 }
 
+/**
+ * Home Page Component
+ *
+ * Renders either a marketing page (unauthenticated) or event dashboard (authenticated)
+ */
 export default function Home() {
+  // ============================================
+  // HOOKS & STATE
+  // ============================================
+
+  // Get authentication session and status
   const { data: session, status } = useSession();
+
+  // Store fetched events from the API
   const [events, setEvents] = useState<Event[]>([]);
+
+  // Loading state for initial data fetch
   const [loading, setLoading] = useState(true);
+
+  // Selection mode state for bulk operations
   const [selectionMode, setSelectionMode] = useState(false);
+
+  // Set of selected event IDs for bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Loading state during bulk deletion
   const [deleting, setDeleting] = useState(false);
+
+  // Search query for filtering events
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Time-based filter: "all", "day", "week", "nextweek", or "month"
   const [timeFilter, setTimeFilter] = useState<"all" | "day" | "week" | "nextweek" | "month">("all");
 
+  // ============================================
+  // DATA FETCHING
+  // ============================================
+
+  /**
+   * Fetch events when user is authenticated
+   * Runs on initial mount and when session changes
+   */
   useEffect(() => {
     if (session) {
       fetchEvents();
@@ -35,6 +92,10 @@ export default function Home() {
     }
   }, [session]);
 
+  /**
+   * Fetch all user's events from the API
+   * Only fetches non-deleted events (filtered server-side)
+   */
   const fetchEvents = async () => {
     try {
       const response = await fetch("/api/events");
@@ -49,46 +110,64 @@ export default function Home() {
     }
   };
 
-  // Filter events based on search query and time filter
+  // ============================================
+  // FILTERING LOGIC
+  // ============================================
+
+  /**
+   * Filter events based on search query and time filter
+   * Uses useMemo to avoid recalculating on every render
+   *
+   * Time Filter Logic:
+   * - "day": Events happening today only
+   * - "week": Events from today through end of current week (Sunday)
+   * - "nextweek": Events in the upcoming week (next Monday through Sunday)
+   * - "month": Events through the end of current month
+   * - "all": No time filtering
+   *
+   * Search matches against: name, location, description (case-insensitive)
+   */
   const filteredEvents = useMemo(() => {
     let filtered = events;
 
     // Apply time filter
     if (timeFilter !== "all") {
       const now = new Date();
+      // Normalize to start of today (midnight)
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       let startDate: Date = today;
       let endDate: Date;
 
       if (timeFilter === "day") {
-        // End of today
+        // End of today (midnight tomorrow)
         endDate = new Date(today);
         endDate.setDate(endDate.getDate() + 1);
       } else if (timeFilter === "week") {
-        // End of this week (Sunday)
-        const dayOfWeek = today.getDay();
+        // End of this week (Sunday midnight)
+        const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
         endDate = new Date(today);
         endDate.setDate(endDate.getDate() + (7 - dayOfWeek));
       } else if (timeFilter === "nextweek") {
-        // Next week (Monday to Sunday)
+        // Next week: from next Monday to following Sunday
         const dayOfWeek = today.getDay();
         startDate = new Date(today);
         startDate.setDate(startDate.getDate() + (7 - dayOfWeek) + 1); // Next Monday
         endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 7); // Following Sunday
       } else {
-        // End of this month
+        // End of this month (first day of next month)
         endDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
       }
 
+      // Filter events within the date range
       filtered = filtered.filter((event) => {
         const eventDate = new Date(event.date);
         return eventDate >= startDate && eventDate < endDate;
       });
     }
 
-    // Apply search filter
+    // Apply search filter (case-insensitive partial match)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter((event) => {
@@ -107,6 +186,14 @@ export default function Home() {
     return filtered;
   }, [events, searchQuery, timeFilter]);
 
+  // ============================================
+  // SELECTION MODE HANDLERS
+  // ============================================
+
+  /**
+   * Toggle selection state for a single event
+   * Uses Set for efficient add/delete operations
+   */
   const toggleSelectEvent = (id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev);
@@ -119,24 +206,39 @@ export default function Home() {
     });
   };
 
+  /**
+   * Select or deselect all visible (filtered) events
+   * Toggles between all selected and none selected
+   */
   const selectAllEvents = () => {
     if (selectedIds.size === filteredEvents.length) {
+      // All selected, so deselect all
       setSelectedIds(new Set());
     } else {
+      // Select all visible events
       setSelectedIds(new Set(filteredEvents.map((e) => e.id)));
     }
   };
 
+  /**
+   * Exit selection mode and clear selections
+   */
   const cancelSelection = () => {
     setSelectionMode(false);
     setSelectedIds(new Set());
   };
 
+  /**
+   * Delete all selected events (soft delete - moves to bin)
+   * Sends DELETE request for each selected event in parallel
+   * Updates local state after successful deletion
+   */
   const deleteSelectedEvents = async () => {
     if (selectedIds.size === 0) return;
 
+    // Confirm with user before bulk deletion
     const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedIds.size} event(s)? This action cannot be undone.`
+      `Move ${selectedIds.size} event(s) to bin?`
     );
 
     if (!confirmed) return;
@@ -144,13 +246,14 @@ export default function Home() {
     setDeleting(true);
 
     try {
+      // Delete all selected events in parallel
       const deletePromises = Array.from(selectedIds).map((id) =>
         fetch(`/api/events/${id}`, { method: "DELETE" })
       );
 
       await Promise.all(deletePromises);
 
-      // Remove deleted events from state
+      // Remove deleted events from local state
       setEvents((prev) => prev.filter((e) => !selectedIds.has(e.id)));
       setSelectedIds(new Set());
       setSelectionMode(false);
@@ -162,13 +265,25 @@ export default function Home() {
     }
   };
 
-  // Separate upcoming and past events from filtered results
+  // ============================================
+  // EVENT CATEGORIZATION
+  // ============================================
+
+  /**
+   * Separate filtered events into upcoming and past
+   * Based on whether event date is today or later vs before today
+   */
   const now = new Date();
-  now.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0); // Normalize to midnight for date comparison
 
   const upcomingEvents = filteredEvents.filter((e) => new Date(e.date) >= now);
   const pastEvents = filteredEvents.filter((e) => new Date(e.date) < now);
 
+  // ============================================
+  // LOADING STATE
+  // ============================================
+
+  // Show loading spinner while fetching session or events
   if (status === "loading" || loading) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
@@ -179,10 +294,15 @@ export default function Home() {
     );
   }
 
+  // ============================================
+  // UNAUTHENTICATED VIEW - Marketing Landing Page
+  // ============================================
+
   if (!session) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center py-20">
+          {/* Hero Section */}
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Event Sorter
           </h1>
@@ -197,7 +317,9 @@ export default function Home() {
             Get Started
           </Link>
 
+          {/* Feature Cards - 3 column grid on desktop */}
           <div className="mt-16 grid md:grid-cols-3 gap-8 text-left">
+            {/* Feature 1: Upload Posters */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
@@ -220,6 +342,7 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Feature 2: AI Extraction */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
@@ -242,6 +365,7 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Feature 3: Calendar Sync */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
@@ -269,11 +393,17 @@ export default function Home() {
     );
   }
 
+  // ============================================
+  // AUTHENTICATED VIEW - Event Dashboard
+  // ============================================
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Header Row: Title and Action Buttons */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Your Events</h1>
         <div className="flex items-center gap-3">
+          {/* Delete mode toggle - only shown when events exist and not in selection mode */}
           {events.length > 0 && !selectionMode && (
             <button
               onClick={() => setSelectionMode(true)}
@@ -295,6 +425,7 @@ export default function Home() {
               Delete
             </button>
           )}
+          {/* Add new event button */}
           <Link
             href="/upload"
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -304,10 +435,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Time filter toggle */}
+      {/* Time Filter Toggle - Expandable button group */}
+      {/* Shows current filter, expands on hover to show all options */}
       {events.length > 0 && !selectionMode && (
         <div className="flex items-center mb-4">
           <div className="group flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+            {/* Main button shows current selection */}
             <button
               onClick={() => setTimeFilter("all")}
               className={`px-4 py-2 text-sm font-medium transition ${
@@ -318,6 +451,7 @@ export default function Home() {
             >
               {timeFilter === "all" ? "All" : timeFilter === "day" ? "Today" : timeFilter === "week" ? "This Week" : timeFilter === "nextweek" ? "Next Week" : "This Month"}
             </button>
+            {/* Hidden options that expand on hover */}
             <div className="flex overflow-hidden max-w-0 group-hover:max-w-[500px] transition-all duration-500 ease-out">
               <button
                 onClick={() => setTimeFilter("day")}
@@ -364,9 +498,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* Search bar */}
+      {/* Search Bar - Hidden during selection mode */}
       {events.length > 0 && !selectionMode && (
         <div className="relative mb-6">
+          {/* Search icon */}
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg
               className="w-5 h-5 text-gray-400 dark:text-gray-500"
@@ -382,12 +517,14 @@ export default function Home() {
               />
             </svg>
           </div>
+          {/* Search input */}
           <input
             type="search"
             placeholder="Search events by name, location, or description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => {
+              // Prevent form submission on Enter
               if (e.key === "Enter") {
                 e.preventDefault();
               }
@@ -395,6 +532,7 @@ export default function Home() {
             autoComplete="off"
             className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
+          {/* Clear search button - only visible when there's a query */}
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
@@ -418,7 +556,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Search/filter results indicator */}
+      {/* Search/Filter Results Indicator */}
+      {/* Shows count of matching events when filters are active */}
       {(searchQuery || timeFilter !== "all") && (
         <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
           Found {filteredEvents.length} event{filteredEvents.length !== 1 ? "s" : ""}
@@ -433,13 +572,16 @@ export default function Home() {
         </div>
       )}
 
-      {/* Selection mode toolbar */}
+      {/* Selection Mode Toolbar */}
+      {/* Appears when selection mode is active */}
       {selectionMode && (
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
+            {/* Selection count */}
             <span className="text-red-800 dark:text-red-200 font-medium">
               {selectedIds.size} event(s) selected
             </span>
+            {/* Select/Deselect all toggle */}
             <button
               onClick={selectAllEvents}
               className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm underline"
@@ -448,12 +590,14 @@ export default function Home() {
             </button>
           </div>
           <div className="flex items-center gap-3">
+            {/* Cancel selection button */}
             <button
               onClick={cancelSelection}
               className="px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition"
             >
               Cancel
             </button>
+            {/* Delete selected button */}
             <button
               onClick={deleteSelectedEvents}
               disabled={selectedIds.size === 0 || deleting}
@@ -487,7 +631,12 @@ export default function Home() {
         </div>
       )}
 
+      {/* ============================================ */}
+      {/* CONTENT AREA - Conditional rendering based on data state */}
+      {/* ============================================ */}
+
       {events.length === 0 ? (
+        // EMPTY STATE - No events at all
         <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
           <svg
             className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4"
@@ -516,6 +665,7 @@ export default function Home() {
           </Link>
         </div>
       ) : filteredEvents.length === 0 ? (
+        // NO RESULTS STATE - Events exist but none match filters
         <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
           <svg
             className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4"
@@ -543,6 +693,7 @@ export default function Home() {
             )}
             {!searchQuery && timeFilter === "all" && " match your filters"}
           </p>
+          {/* Buttons to clear filters */}
           <div className="flex items-center justify-center gap-3">
             {timeFilter !== "all" && (
               <button
@@ -563,18 +714,22 @@ export default function Home() {
           </div>
         </div>
       ) : (
+        // EVENTS GRID - Display filtered events
         <>
+          {/* Selection mode instruction */}
           {selectionMode && (
             <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
               Click on events to select them for deletion
             </p>
           )}
 
+          {/* Upcoming Events Section */}
           {upcomingEvents.length > 0 && (
             <section className="mb-12">
               <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
                 Upcoming Events ({upcomingEvents.length})
               </h2>
+              {/* Responsive grid: 1 col mobile, 2 cols tablet, 3 cols desktop */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {upcomingEvents.map((event) => (
                   <EventCard
@@ -589,6 +744,7 @@ export default function Home() {
             </section>
           )}
 
+          {/* Past Events Section */}
           {pastEvents.length > 0 && (
             <section>
               <h2 className="text-lg font-semibold text-gray-500 dark:text-gray-400 mb-4">
