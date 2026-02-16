@@ -1,20 +1,24 @@
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "./ThemeProvider";
+import ReminderModal from "./ReminderModal";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const { theme, toggleTheme } = useTheme();
+  const [showReminder, setShowReminder] = useState(false);
 
   return (
+    <>
     <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
       <div className="w-full px-6">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
-            Event Sorter
+            RK Solutions
           </Link>
 
           <div className="flex items-center gap-4">
@@ -60,13 +64,51 @@ export default function Navbar() {
             ) : session ? (
               <>
                 <Link
-                  href="/upload"
+                  href="/event-sorter/chat"
+                  className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  aria-label="AI Chat"
+                >
+                  <svg
+                    className="w-5 h-5 text-gray-700 dark:text-gray-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                </Link>
+                <button
+                  onClick={() => setShowReminder(true)}
+                  className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  aria-label="Send reminder"
+                >
+                  <svg
+                    className="w-5 h-5 text-gray-700 dark:text-gray-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                </button>
+                <Link
+                  href="/event-sorter/upload"
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                 >
                   Upload Event
                 </Link>
                 <Link
-                  href="/bin"
+                  href="/event-sorter/bin"
                   className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   aria-label="Bin"
                 >
@@ -131,5 +173,10 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+
+    {showReminder && (
+      <ReminderModal onClose={() => setShowReminder(false)} />
+    )}
+    </>
   );
 }

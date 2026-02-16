@@ -63,9 +63,9 @@ export async function createCalendarEvent(
     // Combine date and time into ISO format: "2024-01-15T14:00:00"
     startDateTime = `${event.date}T${event.time}:00`;
 
-    // Calculate end time (default 2-hour duration)
+    // Calculate end time (default 1-hour duration)
     const startDate = new Date(startDateTime);
-    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // Add 2 hours in milliseconds
+    const endDate = new Date(startDate.getTime() + 1 * 60 * 60 * 1000); // Add 1 hour in milliseconds
 
     // Convert to ISO strings for the API
     endDateTime = endDate.toISOString();

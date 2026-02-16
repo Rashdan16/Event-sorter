@@ -28,9 +28,11 @@ interface Event {
   name: string;                    // Event title
   description?: string | null;     // Event description (optional)
   location?: string | null;        // Venue/location (optional)
-  date: string;                    // Event date (ISO string)
+  date: string;                    // Event start date (ISO string)
+  endDate?: string | null;         // Event end date (ISO string), null if single-day
   time?: string | null;            // Event time (optional)
   ticketUrl?: string | null;       // Ticket URL (optional)
+  price?: string | null;           // Event price (optional, e.g., "Free", "$10")
   imageUrl?: string | null;        // Poster image URL (optional)
   googleEventId?: string | null;   // Google Calendar ID if synced (optional)
 }
@@ -176,7 +178,10 @@ export default function EventCard({
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span>{formatDate(eventDate)}</span>
+          <span>
+            {formatDate(eventDate)}
+            {event.endDate && ` - ${formatDate(new Date(event.endDate))}`}
+          </span>
           {/* Show time if available */}
           {event.time && <span>at {event.time}</span>}
         </div>
@@ -210,7 +215,19 @@ export default function EventCard({
         )}
 
         {/* Status badges */}
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          {/* Price badge - Free (green) or Paid with £ (blue) */}
+          {event.price && (
+            event.price.toLowerCase() === "free" ? (
+              <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded font-medium">
+                Free
+              </span>
+            ) : (
+              <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded font-medium">
+                £{event.price.replace(/[£$]/g, "")}
+              </span>
+            )
+          )}
           {/* "In Calendar" badge - shown when synced to Google Calendar */}
           {event.googleEventId && (
             <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded">
@@ -235,7 +252,7 @@ export default function EventCard({
 
   // In normal mode, wrap with Link to navigate to event detail page
   return (
-    <Link href={`/events/${event.id}`} className="relative block">
+    <Link href={`/event-sorter/events/${event.id}`} className="relative block">
       {cardContent}
     </Link>
   );

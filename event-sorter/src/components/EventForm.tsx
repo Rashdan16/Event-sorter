@@ -38,9 +38,11 @@ interface EventFormData {
   name: string;        // Event name (required)
   description: string; // Event description
   location: string;    // Event venue/location
-  date: string;       // Event date in YYYY-MM-DD format (required)
+  date: string;       // Event start date in YYYY-MM-DD format (required)
+  endDate: string;    // Event end date in YYYY-MM-DD format (optional, for multi-day events)
   time: string;       // Event time in HH:MM format
   ticketUrl: string;  // URL for ticket purchase
+  price: string;      // Event price (e.g., "Free", "$10")
 }
 
 /**
@@ -67,8 +69,10 @@ export default function EventForm({
     description: initialData?.description || "",
     location: initialData?.location || "",
     date: initialData?.date || "",
+    endDate: initialData?.endDate || "",
     time: initialData?.time || "",
     ticketUrl: initialData?.ticketUrl || "",
+    price: initialData?.price || "",
   });
 
   // Loading state for the "Add to Calendar" button
@@ -141,15 +145,15 @@ export default function EventForm({
         />
       </div>
 
-      {/* Date and Time fields in a 2-column grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Date field (required) */}
+      {/* Date, End Date, and Time fields in a 3-column grid */}
+      <div className="grid grid-cols-3 gap-4">
+        {/* Start Date field (required) */}
         <div>
           <label
             htmlFor="date"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Date *
+            Start Date *
           </label>
           <input
             type="date"
@@ -158,6 +162,25 @@ export default function EventForm({
             value={formData.date}
             onChange={handleChange}
             required
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          />
+        </div>
+
+        {/* End Date field (optional, for multi-day events) */}
+        <div>
+          <label
+            htmlFor="endDate"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            End Date
+          </label>
+          <input
+            type="date"
+            id="endDate"
+            name="endDate"
+            value={formData.endDate}
+            onChange={handleChange}
+            min={formData.date}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
@@ -216,6 +239,37 @@ export default function EventForm({
           placeholder="https://..."
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
         />
+      </div>
+
+      {/* Price field (optional) - uses £ (GBP) currency */}
+      <div>
+        <label
+          htmlFor="price"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
+          Price
+        </label>
+        <div className="relative">
+          {/* Show £ prefix when the value is not "Free" */}
+          {formData.price.toLowerCase() !== "free" && formData.price !== "" && (
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="text-gray-500 dark:text-gray-400 font-medium">£</span>
+            </div>
+          )}
+          <input
+            type="text"
+            id="price"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            placeholder='e.g. "Free" or "10"'
+            className={`w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+              formData.price.toLowerCase() !== "free" && formData.price !== ""
+                ? "pl-8 pr-3"
+                : "px-3"
+            }`}
+          />
+        </div>
       </div>
 
       {/* Description field (optional, multiline) */}

@@ -17,10 +17,12 @@
  */
 export interface ExtractedEventData {
   name: string | null;        // Event title/name extracted from the poster
-  date: string | null;        // Event date (format: YYYY-MM-DD)
+  date: string | null;        // Event start date (format: YYYY-MM-DD)
+  endDate: string | null;     // Event end date (format: YYYY-MM-DD), null if single-day
   time: string | null;        // Event time (format: HH:MM)
   location: string | null;    // Venue or address of the event
   ticketUrl: string | null;   // URL to purchase tickets (if found on poster)
+  price: string | null;       // Price (e.g., "Free", "$10", "15 AED") or null if unknown
   description: string | null; // Brief description of the event
 }
 
@@ -37,9 +39,11 @@ export interface EventFormData {
   name: string;           // Required: Event name
   description?: string;   // Optional: Event description
   location?: string;      // Optional: Event location/venue
-  date: string;          // Required: Event date (YYYY-MM-DD format)
+  date: string;          // Required: Event start date (YYYY-MM-DD format)
+  endDate?: string;      // Optional: Event end date (YYYY-MM-DD format)
   time?: string;         // Optional: Event time (HH:MM format)
   ticketUrl?: string;    // Optional: URL for ticket purchase
+  price?: string;        // Optional: Event price (e.g., "Free", "$10")
   imageUrl?: string;     // Optional: URL of the uploaded event poster image
 }
 
@@ -58,9 +62,11 @@ export interface Event {
   name: string;                      // Event name/title
   description?: string | null;       // Event description
   location?: string | null;          // Event venue/location
-  date: string;                      // Event date (ISO string format)
+  date: string;                      // Event start date (ISO string format)
+  endDate?: string | null;           // Event end date (ISO string), null if single-day
   time?: string | null;              // Event time
   ticketUrl?: string | null;         // Ticket purchase URL
+  price?: string | null;             // Event price ("Free", "$10", etc.)
   imageUrl?: string | null;          // Event poster image URL
   googleEventId?: string | null;     // Google Calendar event ID (if synced)
   deletedAt?: string | null;         // Soft delete timestamp (null = not deleted)

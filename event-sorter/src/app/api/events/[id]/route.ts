@@ -116,8 +116,10 @@ export async function PUT(
         description: data.description,
         location: data.location,
         date: new Date(data.date),
+        endDate: data.endDate ? new Date(data.endDate) : null,
         time: data.time,
         ticketUrl: data.ticketUrl,
+        price: data.price,
         imageUrl: data.imageUrl,
         googleEventId: data.googleEventId, // Google Calendar event ID if synced
       },

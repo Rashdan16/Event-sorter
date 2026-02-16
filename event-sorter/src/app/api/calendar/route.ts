@@ -144,9 +144,8 @@ export async function POST(request: NextRequest) {
         });
       } catch (refreshError) {
         // If refresh fails, user needs to re-authenticate
-        const errorMsg = refreshError instanceof Error ? refreshError.message : "Token refresh failed";
         return NextResponse.json(
-          { error: errorMsg + ". Please sign out and sign in again." },
+          { error: "Token has been expired or revoked. Please sign out and sign in again." },
           { status: 401 }
         );
       }

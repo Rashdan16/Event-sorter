@@ -14,85 +14,10 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 /**
- * Background Cleanup Function
- *
- * Automatically removes events that have passed more than 1 hour ago.
- * This keeps the user's event list clean by removing outdated events.
- *
- * Runs silently in the background when events are fetched (non-blocking).
- *
- * @param userId - The ID of the user whose events should be cleaned up
- */
-async function cleanupExpiredEvents(userId: string) {
-  const now = new Date();
-
-  // Query all non-deleted events for this user that might be expired
-  // We filter by date <= now to only check events that could potentially be expired
-  const events = await prisma.event.findMany({
-    where: {
-      userId,
-      deletedAt: null, // Don't clean up already-deleted events
-      date: {
-        lte: now, // Only events on or before today
-      },
-    },
-    select: {
-      id: true,
-      date: true,
-      time: true,
-    },
-  });
-
-  // Array to collect IDs of events that should be deleted
-  const expiredEventIds: string[] = [];
-
-  // Check each potential expired event
-  for (const event of events) {
-    // Start with the event's date
-    const eventDateTime = new Date(event.date);
-
-    if (event.time) {
-      // If the event has a specific time, use it
-      // Parse "HH:MM" format and set hours/minutes on the date
-      const [hours, minutes] = event.time.split(":").map(Number);
-      eventDateTime.setHours(hours, minutes, 0, 0);
-    } else {
-      // For all-day events (no specific time), set to end of day
-      // This ensures all-day events aren't deleted until the day is over
-      eventDateTime.setHours(23, 59, 0, 0);
-    }
-
-    // Calculate expiry time: event time + 1 hour grace period
-    // Events are kept for 1 hour after they end
-    const expiryTime = new Date(eventDateTime.getTime() + 60 * 60 * 1000);
-
-    // If current time is past the expiry time, mark for deletion
-    if (now >= expiryTime) {
-      expiredEventIds.push(event.id);
-    }
-  }
-
-  // Batch delete all expired events in a single database operation
-  if (expiredEventIds.length > 0) {
-    await prisma.event.deleteMany({
-      where: {
-        id: {
-          in: expiredEventIds,
-        },
-      },
-    });
-    // Log for debugging/monitoring purposes
-    console.log(`Auto-cleanup: Deleted ${expiredEventIds.length} expired event(s)`);
-  }
-}
-
-/**
  * GET /api/events
  *
  * Retrieves all active (non-deleted) events for the authenticated user.
  * Events are sorted by date in ascending order (earliest first).
- *
- * Also triggers background cleanup of expired events.
  *
  * @returns JSON array of event objects, or error response
  */
@@ -106,13 +31,6 @@ export async function GET() {
   }
 
   try {
-    // Trigger cleanup in background (fire-and-forget)
-    // Using .catch() prevents unhandled promise rejections
-    // Don't await - this runs asynchronously to not slow down the response
-    cleanupExpiredEvents(session.user.id).catch((err) =>
-      console.error("Cleanup error:", err)
-    );
-
     // Fetch all active events for this user
     const events = await prisma.event.findMany({
       where: {
@@ -172,8 +90,10 @@ export async function POST(request: NextRequest) {
         description: data.description,
         location: data.location,
         date: new Date(data.date), // Convert string date to Date object
+        endDate: data.endDate ? new Date(data.endDate) : null,
         time: data.time,
         ticketUrl: data.ticketUrl,
+        price: data.price,
         imageUrl: data.imageUrl,
         userId: session.user.id, // Associate with the current user
       },

@@ -65,8 +65,10 @@ model Event {
   description   String?
   location      String?
   date          DateTime
+  endDate       DateTime?
   time          String?
   ticketUrl     String?
+  price         String?
   imageUrl      String?
   googleEventId String?
   userId        String

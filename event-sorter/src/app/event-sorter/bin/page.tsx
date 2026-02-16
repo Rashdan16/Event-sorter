@@ -1,79 +1,31 @@
-/**
- * Bin Page Component
- *
- * Displays soft-deleted events that can be restored or permanently deleted.
- * This is the "trash" or "recycle bin" feature for the Event Sorter app.
- *
- * Features:
- * - View all deleted events with their deletion timestamps
- * - Selection mode for bulk operations
- * - Restore selected events (moves back to main event list)
- * - Delete selected events permanently (irreversible)
- * - Empty entire bin at once
- *
- * This is a client component because it:
- * - Uses hooks (useSession, useState, useEffect)
- * - Handles user interactions (selection, restore, delete)
- * - Manages complex state for selection mode
- */
-
 "use client";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-/**
- * Interface for deleted events
- * Includes deletedAt timestamp to show when it was deleted
- */
 interface DeletedEvent {
   id: string;
   name: string;
   description?: string | null;
   location?: string | null;
   date: string;
+  endDate?: string | null;
   time?: string | null;
   ticketUrl?: string | null;
+  price?: string | null;
   imageUrl?: string | null;
-  deletedAt: string; // ISO timestamp of when event was deleted
+  deletedAt: string;
 }
 
-/**
- * Bin Page Component
- *
- * Renders the deleted events list with restore/delete functionality
- */
 export default function BinPage() {
-  // ============================================
-  // HOOKS & STATE
-  // ============================================
-
-  // Authentication session
   const { data: session, status } = useSession();
-
-  // List of deleted events fetched from API
   const [events, setEvents] = useState<DeletedEvent[]>([]);
-
-  // Loading state during initial fetch
   const [loading, setLoading] = useState(true);
-
-  // Whether selection mode is active
   const [selectionMode, setSelectionMode] = useState(false);
-
-  // Set of selected event IDs
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  // Loading state during restore/delete operations
   const [processing, setProcessing] = useState(false);
 
-  // ============================================
-  // DATA FETCHING
-  // ============================================
-
-  /**
-   * Fetch deleted events when user is authenticated
-   */
   useEffect(() => {
     if (session) {
       fetchDeletedEvents();
@@ -82,10 +34,6 @@ export default function BinPage() {
     }
   }, [session]);
 
-  /**
-   * Fetch all deleted events from the bin API
-   * These are events where deletedAt is not null
-   */
   const fetchDeletedEvents = async () => {
     try {
       const response = await fetch("/api/bin");
@@ -100,13 +48,6 @@ export default function BinPage() {
     }
   };
 
-  // ============================================
-  // SELECTION MODE HANDLERS
-  // ============================================
-
-  /**
-   * Toggle selection state for a single event
-   */
   const toggleSelectEvent = (id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev);
@@ -119,9 +60,6 @@ export default function BinPage() {
     });
   };
 
-  /**
-   * Select or deselect all events
-   */
   const selectAllEvents = () => {
     if (selectedIds.size === events.length) {
       setSelectedIds(new Set());
@@ -130,37 +68,22 @@ export default function BinPage() {
     }
   };
 
-  /**
-   * Exit selection mode and clear selections
-   */
   const cancelSelection = () => {
     setSelectionMode(false);
     setSelectedIds(new Set());
   };
 
-  // ============================================
-  // ACTION HANDLERS
-  // ============================================
-
-  /**
-   * Restore selected events
-   *
-   * Sends POST request to /api/bin/[id] for each selected event
-   * This sets deletedAt to null, making the event visible again
-   */
   const restoreSelected = async () => {
     if (selectedIds.size === 0) return;
     setProcessing(true);
 
     try {
-      // Restore all selected events in parallel
       await Promise.all(
         Array.from(selectedIds).map((id) =>
           fetch(`/api/bin/${id}`, { method: "POST" })
         )
       );
 
-      // Remove restored events from local state
       setEvents((prev) => prev.filter((e) => !selectedIds.has(e.id)));
       setSelectedIds(new Set());
       setSelectionMode(false);
@@ -172,29 +95,20 @@ export default function BinPage() {
     }
   };
 
-  /**
-   * Permanently delete selected events
-   *
-   * Sends DELETE request to /api/bin/[id] for each selected event
-   * This is irreversible - events are completely removed from database
-   */
   const deleteSelectedPermanently = async () => {
     if (selectedIds.size === 0) return;
 
-    // Confirm before permanent deletion
     if (!confirm(`Permanently delete ${selectedIds.size} event(s)? This cannot be undone.`)) return;
 
     setProcessing(true);
 
     try {
-      // Delete all selected events in parallel
       await Promise.all(
         Array.from(selectedIds).map((id) =>
           fetch(`/api/bin/${id}`, { method: "DELETE" })
         )
       );
 
-      // Remove deleted events from local state
       setEvents((prev) => prev.filter((e) => !selectedIds.has(e.id)));
       setSelectedIds(new Set());
       setSelectionMode(false);
@@ -206,14 +120,7 @@ export default function BinPage() {
     }
   };
 
-  /**
-   * Empty the entire bin
-   *
-   * Sends DELETE request to /api/bin to permanently delete all events
-   * This is irreversible
-   */
   const emptyBin = async () => {
-    // Confirm before emptying bin
     if (!confirm("Empty bin? All events will be permanently deleted. This cannot be undone.")) return;
 
     setProcessing(true);
@@ -230,14 +137,6 @@ export default function BinPage() {
     }
   };
 
-  // ============================================
-  // HELPER FUNCTIONS
-  // ============================================
-
-  /**
-   * Format a date for display
-   * Example: "Sat, Jan 15, 2025"
-   */
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -247,10 +146,6 @@ export default function BinPage() {
     });
   };
 
-  /**
-   * Format the deletedAt timestamp for display
-   * Example: "Jan 15, 3:30 PM"
-   */
   const formatDeletedAt = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
@@ -261,11 +156,6 @@ export default function BinPage() {
     });
   };
 
-  // ============================================
-  // LOADING STATE
-  // ============================================
-
-  // Show loading spinner while checking auth or fetching events
   if (status === "loading" || loading) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
@@ -276,11 +166,6 @@ export default function BinPage() {
     );
   }
 
-  // ============================================
-  // UNAUTHENTICATED STATE
-  // ============================================
-
-  // Show sign-in prompt if not authenticated
   if (!session) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12 text-center">
@@ -292,18 +177,12 @@ export default function BinPage() {
     );
   }
 
-  // ============================================
-  // RENDER
-  // ============================================
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Header Row */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          {/* Back to home link */}
           <Link
-            href="/"
+            href="/event-sorter"
             className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1"
           >
             <svg
@@ -324,18 +203,15 @@ export default function BinPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Bin</h1>
         </div>
 
-        {/* Action Buttons (when not in selection mode) */}
         <div className="flex items-center gap-3">
           {events.length > 0 && !selectionMode && (
             <>
-              {/* Enter selection mode */}
               <button
                 onClick={() => setSelectionMode(true)}
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
               >
                 Select
               </button>
-              {/* Empty bin button */}
               <button
                 onClick={emptyBin}
                 disabled={processing}
@@ -348,15 +224,12 @@ export default function BinPage() {
         </div>
       </div>
 
-      {/* Selection Mode Toolbar */}
       {selectionMode && (
         <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Selection count */}
             <span className="text-blue-800 dark:text-blue-200 font-medium">
               {selectedIds.size} event(s) selected
             </span>
-            {/* Select/Deselect all toggle */}
             <button
               onClick={selectAllEvents}
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm underline"
@@ -365,14 +238,12 @@ export default function BinPage() {
             </button>
           </div>
           <div className="flex items-center gap-3">
-            {/* Cancel button */}
             <button
               onClick={cancelSelection}
               className="px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition"
             >
               Cancel
             </button>
-            {/* Restore button */}
             <button
               onClick={restoreSelected}
               disabled={selectedIds.size === 0 || processing}
@@ -397,7 +268,6 @@ export default function BinPage() {
               )}
               Restore
             </button>
-            {/* Delete permanently button */}
             <button
               onClick={deleteSelectedPermanently}
               disabled={selectedIds.size === 0 || processing}
@@ -422,14 +292,8 @@ export default function BinPage() {
         </div>
       )}
 
-      {/* ============================================ */}
-      {/* CONTENT AREA */}
-      {/* ============================================ */}
-
       {events.length === 0 ? (
-        // EMPTY STATE - No deleted events
         <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-          {/* Trash icon */}
           <svg
             className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4"
             fill="none"
@@ -450,23 +314,20 @@ export default function BinPage() {
             Deleted events will appear here
           </p>
           <Link
-            href="/"
+            href="/event-sorter"
             className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             Back to Events
           </Link>
         </div>
       ) : (
-        // EVENTS GRID - Display deleted events
         <>
-          {/* Selection mode instruction */}
           {selectionMode && (
             <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
               Click on events to select them
             </p>
           )}
 
-          {/* Event cards in responsive grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => {
               const eventDate = new Date(event.date);
@@ -486,7 +347,6 @@ export default function BinPage() {
                       : "border-gray-200 dark:border-gray-700"
                   }`}
                 >
-                  {/* Selection Checkbox Overlay */}
                   {selectionMode && (
                     <div className="absolute top-3 left-3 z-10">
                       <div
@@ -515,7 +375,6 @@ export default function BinPage() {
                     </div>
                   )}
 
-                  {/* Event Image */}
                   {event.imageUrl && (
                     <div className="h-48 bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
                       <img
@@ -526,14 +385,11 @@ export default function BinPage() {
                     </div>
                   )}
 
-                  {/* Event Details */}
                   <div className="p-4">
-                    {/* Event Name */}
                     <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
                       {event.name}
                     </h3>
 
-                    {/* Event Date & Time */}
                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-2">
                       <svg
                         className="w-4 h-4"
@@ -548,11 +404,13 @@ export default function BinPage() {
                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      <span>{formatDate(eventDate)}</span>
+                      <span>
+                        {formatDate(eventDate)}
+                        {event.endDate && ` - ${formatDate(new Date(event.endDate))}`}
+                      </span>
                       {event.time && <span>at {event.time}</span>}
                     </div>
 
-                    {/* Event Location */}
                     {event.location && (
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-2">
                         <svg
@@ -578,8 +436,18 @@ export default function BinPage() {
                       </div>
                     )}
 
-                    {/* Deletion Timestamp Badge */}
-                    <div className="flex items-center gap-2 mt-3">
+                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                      {event.price && (
+                        event.price.toLowerCase() === "free" ? (
+                          <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded font-medium">
+                            Free
+                          </span>
+                        ) : (
+                          <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded font-medium">
+                            £{event.price.replace(/[£$]/g, "")}
+                          </span>
+                        )
+                      )}
                       <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-2 py-1 rounded">
                         Deleted {formatDeletedAt(event.deletedAt)}
                       </span>

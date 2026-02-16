@@ -24,6 +24,13 @@ interface AIProvider {
    * @returns Promise resolving to extracted event data
    */
   extractEventData(imageBase64: string): Promise<ExtractedEventData>;
+
+  /**
+   * Extract event data from webpage text content
+   * @param textContent - The text content scraped from an event webpage
+   * @returns Promise resolving to extracted event data
+   */
+  extractEventDataFromText(textContent: string): Promise<ExtractedEventData>;
 }
 
 /**
@@ -82,10 +89,12 @@ class OpenAIProvider implements AIProvider {
               text: `Analyze this event poster image and extract the following information. Return a JSON object with these exact fields:
 {
   "name": "The name/title of the event",
-  "date": "The date in YYYY-MM-DD format",
+  "date": "The start date in YYYY-MM-DD format",
+  "endDate": "The end date in YYYY-MM-DD format if the event spans multiple days, otherwise null",
   "time": "The time in HH:MM format (24-hour)",
   "location": "The venue or location",
   "ticketUrl": "Any URL for tickets or more info",
+  "price": "The price/cost of the event in GBP pounds. Return just the number (e.g. '10' for £10, '25.50' for £25.50). Use 'Free' if the event is explicitly free or has no cost",
   "description": "A brief description of the event"
 }
 
@@ -140,13 +149,102 @@ If any field cannot be determined from the image, set its value to null.`,
       return {
         name: parsed.name || null,
         date: parsed.date || null,
+        endDate: parsed.endDate || null,
         time: parsed.time || null,
         location: parsed.location || null,
         ticketUrl: parsed.ticketUrl || null,
+        price: parsed.price || null,
         description: parsed.description || null,
       };
     } catch (e) {
       // Log the raw content for debugging if JSON parsing fails
+      console.error("AI response content:", content);
+      throw new Error(`Failed to parse AI response as JSON: ${e}`);
+    }
+  }
+
+  /**
+   * Extract event information from webpage text content using GPT-4o
+   *
+   * Process:
+   * 1. Send the scraped webpage text to GPT-4o
+   * 2. Request JSON response format for reliable parsing
+   * 3. Parse and validate the response
+   * 4. Return normalized event data
+   *
+   * @param textContent - The text content from a scraped webpage
+   * @returns Extracted event data with null for any fields that couldn't be determined
+   */
+  async extractEventDataFromText(textContent: string): Promise<ExtractedEventData> {
+    // Truncate very long content to stay within token limits
+    const truncated = textContent.length > 10000
+      ? textContent.substring(0, 10000) + "\n...[truncated]"
+      : textContent;
+
+    // Make API call to OpenAI's chat completions endpoint
+    const response = await this.client.chat.completions.create({
+      model: "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: "You are an event information extractor. Always respond with valid JSON only.",
+        },
+        {
+          role: "user",
+          content: `Analyze the following webpage content and extract event information. Return a JSON object with these exact fields:
+{
+  "name": "The name/title of the event",
+  "date": "The start date in YYYY-MM-DD format",
+  "endDate": "The end date in YYYY-MM-DD format if the event spans multiple days, otherwise null",
+  "time": "The time in HH:MM format (24-hour)",
+  "location": "The venue or location",
+  "ticketUrl": "Any URL for tickets or more info",
+  "price": "The price/cost of the event in GBP pounds. Return just the number (e.g. '10' for £10, '25.50' for £25.50). Use 'Free' if the event is explicitly free or has no cost",
+  "description": "A brief description of the event"
+}
+
+If any field cannot be determined from the content, set its value to null.
+
+Webpage content:
+${truncated}`,
+        },
+      ],
+      max_tokens: 1000,
+    });
+
+    // Extract the text content from the response
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from AI");
+    }
+
+    try {
+      // Clean up the response content (remove markdown code blocks if present)
+      let cleanContent = content.trim();
+      if (cleanContent.startsWith("```json")) {
+        cleanContent = cleanContent.slice(7);
+      } else if (cleanContent.startsWith("```")) {
+        cleanContent = cleanContent.slice(3);
+      }
+      if (cleanContent.endsWith("```")) {
+        cleanContent = cleanContent.slice(0, -3);
+      }
+      cleanContent = cleanContent.trim();
+
+      // Parse and return normalized data
+      const parsed = JSON.parse(cleanContent);
+      return {
+        name: parsed.name || null,
+        date: parsed.date || null,
+        endDate: parsed.endDate || null,
+        time: parsed.time || null,
+        location: parsed.location || null,
+        ticketUrl: parsed.ticketUrl || null,
+        price: parsed.price || null,
+        description: parsed.description || null,
+      };
+    } catch (e) {
       console.error("AI response content:", content);
       throw new Error(`Failed to parse AI response as JSON: ${e}`);
     }

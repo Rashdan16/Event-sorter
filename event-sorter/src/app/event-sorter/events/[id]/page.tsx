@@ -1,22 +1,3 @@
-/**
- * Event Detail Page Component
- *
- * Dynamic route page for viewing and editing a single event.
- * URL pattern: /events/[id] where [id] is the event's database ID
- *
- * Features:
- * - View event details
- * - Edit event information (name, date, time, location, etc.)
- * - Add event to Google Calendar
- * - Delete event (soft delete - moves to bin)
- * - View ticket link (if available)
- *
- * This is a client component because it:
- * - Uses dynamic params from URL
- * - Manages form state and user interactions
- * - Handles API calls for CRUD operations
- */
-
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -25,77 +6,38 @@ import { useEffect, useState } from "react";
 import EventForm from "@/components/EventForm";
 import Link from "next/link";
 
-/**
- * Event interface matching the database schema
- */
 interface Event {
   id: string;
   name: string;
   description?: string | null;
   location?: string | null;
   date: string;
+  endDate?: string | null;
   time?: string | null;
   ticketUrl?: string | null;
+  price?: string | null;
   imageUrl?: string | null;
-  googleEventId?: string | null; // Set when event is synced to Google Calendar
+  googleEventId?: string | null;
 }
 
-/**
- * Event Detail Page Component
- *
- * Displays a single event with edit capabilities
- */
 export default function EventPage() {
-  // ============================================
-  // HOOKS
-  // ============================================
-
-  // Authentication session
   const { data: session, status } = useSession();
-
-  // Router for navigation
   const router = useRouter();
-
-  // Get event ID from URL params
   const params = useParams();
   const eventId = params.id as string;
 
-  // ============================================
-  // STATE
-  // ============================================
-
-  // The event data fetched from API
   const [event, setEvent] = useState<Event | null>(null);
-
-  // Loading state during initial fetch
   const [loading, setLoading] = useState(true);
-
-  // Loading state during form submission
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Error message to display
   const [error, setError] = useState<string | null>(null);
-
-  // Success message to display (e.g., after save or calendar add)
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // ============================================
-  // DATA FETCHING
-  // ============================================
-
-  /**
-   * Fetch event data when session and eventId are available
-   */
   useEffect(() => {
     if (session && eventId) {
       fetchEvent();
     }
   }, [session, eventId]);
 
-  /**
-   * Fetch single event from API
-   * Redirects to home if event not found (404)
-   */
   const fetchEvent = async () => {
     try {
       const response = await fetch(`/api/events/${eventId}`);
@@ -103,8 +45,7 @@ export default function EventPage() {
         const data = await response.json();
         setEvent(data);
       } else if (response.status === 404) {
-        // Event not found - redirect to home
-        router.push("/");
+        router.push("/event-sorter");
       }
     } catch (error) {
       console.error("Error fetching event:", error);
@@ -113,11 +54,6 @@ export default function EventPage() {
     }
   };
 
-  // ============================================
-  // LOADING STATE
-  // ============================================
-
-  // Show loading spinner while checking auth or fetching event
   if (status === "loading" || loading) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12">
@@ -128,51 +64,31 @@ export default function EventPage() {
     );
   }
 
-  // ============================================
-  // AUTHENTICATION CHECK
-  // ============================================
-
-  // Redirect to sign-in if not authenticated
   if (!session) {
     router.push("/auth/signin");
     return null;
   }
 
-  // ============================================
-  // NOT FOUND STATE
-  // ============================================
-
-  // Show message if event doesn't exist
   if (!event) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Event not found</h1>
-        <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline mt-4 inline-block">
+        <Link href="/event-sorter" className="text-blue-600 dark:text-blue-400 hover:underline mt-4 inline-block">
           Back to events
         </Link>
       </div>
     );
   }
 
-  // ============================================
-  // EVENT HANDLERS
-  // ============================================
-
-  /**
-   * Handle form submission to update event
-   *
-   * Sends PUT request to /api/events/[id] with updated data
-   * Updates local state on success
-   *
-   * @param formData - The updated event data from the form
-   */
   const handleSubmit = async (formData: {
     name: string;
     description: string;
     location: string;
     date: string;
+    endDate: string;
     time: string;
     ticketUrl: string;
+    price: string;
   }) => {
     setIsSubmitting(true);
     setError(null);
@@ -184,7 +100,7 @@ export default function EventPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          imageUrl: event.imageUrl, // Preserve existing image
+          imageUrl: event.imageUrl,
         }),
       });
 
@@ -193,7 +109,6 @@ export default function EventPage() {
         throw new Error(data.error || "Failed to update event");
       }
 
-      // Update local state with response data
       const updatedEvent = await response.json();
       setEvent(updatedEvent);
       setSuccessMessage("Event updated successfully!");
@@ -204,12 +119,6 @@ export default function EventPage() {
     }
   };
 
-  /**
-   * Handle "Add to Calendar" button click
-   *
-   * Creates a Google Calendar event via POST /api/calendar
-   * Updates local state with the Google Event ID on success
-   */
   const handleAddToCalendar = async () => {
     setError(null);
     setSuccessMessage(null);
@@ -226,7 +135,6 @@ export default function EventPage() {
         throw new Error(data.error || "Failed to add to calendar");
       }
 
-      // Update local state with Google Event ID
       const data = await response.json();
       setEvent((prev) =>
         prev ? { ...prev, googleEventId: data.googleEventId } : null
@@ -239,15 +147,7 @@ export default function EventPage() {
     }
   };
 
-  /**
-   * Handle event deletion
-   *
-   * Confirms with user, then sends DELETE to /api/events/[id]
-   * This is a soft delete - event moves to bin
-   * Redirects to home on success
-   */
   const handleDelete = async () => {
-    // Confirm before deleting
     if (!confirm("Move this event to bin?")) return;
 
     try {
@@ -260,24 +160,17 @@ export default function EventPage() {
         throw new Error(data.error || "Failed to delete event");
       }
 
-      // Redirect to home page after successful deletion
-      router.push("/");
+      router.push("/event-sorter");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete event");
     }
   };
 
-  // ============================================
-  // RENDER
-  // ============================================
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Header Row: Back link and Delete button */}
       <div className="flex items-center justify-between mb-6">
-        {/* Back to events link */}
         <Link
-          href="/"
+          href="/event-sorter"
           className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1"
         >
           <svg
@@ -296,7 +189,6 @@ export default function EventPage() {
           Back to events
         </Link>
 
-        {/* Delete button */}
         <button
           onClick={handleDelete}
           className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm"
@@ -305,21 +197,18 @@ export default function EventPage() {
         </button>
       </div>
 
-      {/* Error Message Display */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
 
-      {/* Success Message Display */}
       {successMessage && (
         <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
           {successMessage}
         </div>
       )}
 
-      {/* Event Edit Form Card */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h1 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">Edit Event</h1>
         <EventForm
@@ -327,19 +216,20 @@ export default function EventPage() {
             name: event.name,
             description: event.description ?? null,
             location: event.location ?? null,
-            date: event.date.split("T")[0], // Extract date part from ISO string
+            date: event.date.split("T")[0],
+            endDate: event.endDate ? event.endDate.split("T")[0] : null,
             time: event.time ?? null,
             ticketUrl: event.ticketUrl ?? null,
+            price: event.price ?? null,
           }}
           imageUrl={event.imageUrl || undefined}
           onSubmit={handleSubmit}
           onAddToCalendar={handleAddToCalendar}
-          isInCalendar={!!event.googleEventId} // True if already synced
+          isInCalendar={!!event.googleEventId}
           isSubmitting={isSubmitting}
         />
       </div>
 
-      {/* Ticket URL Display (if available) */}
       {event.ticketUrl && (
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Ticket Link:</p>
