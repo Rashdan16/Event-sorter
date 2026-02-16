@@ -56,10 +56,10 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 opacity-50">
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
-                  className="w-6 h-6 text-gray-400 dark:text-gray-500"
+                  className="w-6 h-6 text-green-600 dark:text-green-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -68,20 +68,20 @@ export default function Dashboard() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Coming Soon</h3>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Financial Helper</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                More productivity tools are on the way.
+                Tools to help manage your finances.
               </p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 opacity-50">
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
-                  className="w-6 h-6 text-gray-400 dark:text-gray-500"
+                  className="w-6 h-6 text-purple-600 dark:text-purple-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -90,13 +90,13 @@ export default function Dashboard() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Coming Soon</h3>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Jobs</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                More productivity tools are on the way.
+                Browse and manage job opportunities.
               </p>
             </div>
           </div>
@@ -182,6 +182,50 @@ export default function Dashboard() {
             Tools to help manage your finances.
           </p>
           <div className="mt-4 flex items-center text-green-600 dark:text-green-400 text-sm font-medium">
+            Open
+            <svg
+              className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </div>
+        </Link>
+
+        {/* Jobs Card */}
+        <Link
+          href="/jobs"
+          className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-purple-500 dark:hover:border-purple-400 transition-all duration-200 hover:scale-105"
+        >
+          <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-800 transition-colors">
+            <svg
+              className="w-7 h-7 text-purple-600 dark:text-purple-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Jobs
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
+            Browse and manage job opportunities.
+          </p>
+          <div className="mt-4 flex items-center text-purple-600 dark:text-purple-400 text-sm font-medium">
             Open
             <svg
               className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
