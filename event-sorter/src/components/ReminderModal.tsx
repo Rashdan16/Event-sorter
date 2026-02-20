@@ -11,19 +11,35 @@ export default function ReminderModal({ onClose }: ReminderModalProps) {
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [sendOption, setSendOption] = useState<"now" | "later">("now");
+  const [scheduledAt, setScheduledAt] = useState("");
+
+  const getMinDatetime = () => {
+    const d = new Date(Date.now() + 5 * 60 * 1000);
+    return d.toISOString().slice(0, 16);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
+    if (sendOption === "later" && !scheduledAt) return;
 
     setSending(true);
     setStatus("idle");
+
+    const body: { message: string; scheduledAt?: string } = {
+      message: message.trim(),
+    };
+
+    if (sendOption === "later" && scheduledAt) {
+      body.scheduledAt = new Date(scheduledAt).toISOString();
+    }
 
     try {
       const res = await fetch("/api/reminder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message.trim() }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -89,7 +105,9 @@ export default function ReminderModal({ onClose }: ReminderModalProps) {
               />
             </svg>
             <p className="text-gray-900 dark:text-white font-medium">
-              Reminder sent to your email!
+              {sendOption === "later" && scheduledAt
+                ? `Reminder scheduled for ${new Date(scheduledAt).toLocaleString()}!`
+                : "Reminder sent to your email!"}
             </p>
             <button
               onClick={onClose}
@@ -110,6 +128,55 @@ export default function ReminderModal({ onClose }: ReminderModalProps) {
               autoFocus
             />
 
+            <div className="mt-4">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Delivery
+              </p>
+              <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setSendOption("now")}
+                  className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                    sendOption === "now"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  }`}
+                  disabled={sending}
+                >
+                  Send Now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSendOption("later")}
+                  className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                    sendOption === "later"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  }`}
+                  disabled={sending}
+                >
+                  Schedule
+                </button>
+              </div>
+            </div>
+
+            {sendOption === "later" && (
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Deliver at
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                  min={getMinDatetime()}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={sending}
+                  required
+                />
+              </div>
+            )}
+
             {status === "error" && (
               <p className="text-red-500 text-sm mt-2">{errorMsg}</p>
             )}
@@ -125,7 +192,11 @@ export default function ReminderModal({ onClose }: ReminderModalProps) {
               </button>
               <button
                 type="submit"
-                disabled={sending || !message.trim()}
+                disabled={
+                  sending ||
+                  !message.trim() ||
+                  (sendOption === "later" && !scheduledAt)
+                }
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 {sending && (
@@ -149,7 +220,13 @@ export default function ReminderModal({ onClose }: ReminderModalProps) {
                     />
                   </svg>
                 )}
-                {sending ? "Sending..." : "Send to Email"}
+                {sending
+                  ? sendOption === "later"
+                    ? "Scheduling..."
+                    : "Sending..."
+                  : sendOption === "later"
+                  ? "Schedule Email"
+                  : "Send to Email"}
               </button>
             </div>
           </form>

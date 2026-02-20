@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { message } = await request.json();
+    const { message, scheduledAt } = await request.json();
 
     if (!message || typeof message !== "string" || !message.trim()) {
       return NextResponse.json(
@@ -22,7 +22,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await resend.emails.send({
+    if (scheduledAt !== undefined) {
+      const scheduled = new Date(scheduledAt);
+      if (isNaN(scheduled.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid scheduled time" },
+          { status: 400 }
+        );
+      }
+      if (scheduled <= new Date()) {
+        return NextResponse.json(
+          { error: "Scheduled time must be in the future" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const emailPayload: Parameters<typeof resend.emails.send>[0] = {
       from: "Event Sorter <onboarding@resend.dev>",
       to: session.user.email,
       subject: "Reminder from Event Sorter",
@@ -30,12 +46,15 @@ export async function POST(request: NextRequest) {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #2563eb;">Your Reminder</h2>
           <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin-top: 12px;">
-            <p style="white-space: pre-wrap; margin: 0; font-size: 16px; color: #1f2937;">${message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+            <p style="white-space: pre-wrap; margin: 0; font-size: 16px; color: #1f2937;">${message.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
           </div>
           <p style="color: #6b7280; font-size: 14px; margin-top: 16px;">Sent from Event Sorter</p>
         </div>
       `,
-    });
+      ...(scheduledAt ? { scheduledAt } : {}),
+    };
+
+    await resend.emails.send(emailPayload);
 
     return NextResponse.json({ success: true });
   } catch (error) {
