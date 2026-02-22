@@ -97,7 +97,7 @@ export default function EventCard({
   const cardContent = (
     <div
       onClick={handleClick}
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border-2 overflow-hidden transition-all duration-200 cursor-pointer ${
+      className={`glass-card rounded-xl overflow-hidden transition-all duration-200 ${
         // Dim past events slightly
         !isUpcoming ? "opacity-60" : ""
       } ${
@@ -105,11 +105,11 @@ export default function EventCard({
         selectionMode
           ? isSelected
             // Selected in selection mode: red border with glow
-            ? "border-red-500 ring-2 ring-red-200 dark:ring-red-900"
+            ? "!border-red-500 ring-2 ring-red-500/20"
             // Unselected in selection mode: subtle red hover
-            : "border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700"
-          // Normal mode: blue hover effect with scale animation
-          : "border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-500 dark:hover:border-blue-400 hover:scale-105"
+            : "hover:!border-red-500/40"
+          // Normal mode: default glass-card hover handles the amber glow
+          : ""
       }`}
     >
       {/* Selection checkbox - only shown in selection mode */}
@@ -121,7 +121,7 @@ export default function EventCard({
                 // Selected: filled red circle with checkmark
                 ? "bg-red-500 border-red-500"
                 // Unselected: empty circle
-                : "bg-white/90 dark:bg-gray-800/90 border-gray-400 dark:border-gray-500"
+                : "bg-black/60 border-gray-500"
             }`}
           >
             {/* Checkmark icon - only shown when selected */}
@@ -146,7 +146,7 @@ export default function EventCard({
 
       {/* Event poster image (if available) */}
       {event.imageUrl && (
-        <div className="h-48 bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-center justify-center relative">
+        <div className="h-48 bg-white/[0.02] overflow-hidden flex items-center justify-center relative">
           <img
             src={event.imageUrl}
             alt={event.name}
@@ -158,12 +158,12 @@ export default function EventCard({
       {/* Event details section */}
       <div className="p-4">
         {/* Event name/title */}
-        <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
+        <h3 className="font-semibold text-lg text-white mb-1">
           {event.name}
         </h3>
 
         {/* Date and time row with calendar icon */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-2">
+        <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
           {/* Calendar icon */}
           <svg
             className="w-4 h-4"
@@ -188,7 +188,7 @@ export default function EventCard({
 
         {/* Location row with map pin icon (if available) */}
         {event.location && (
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-2">
+          <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
             {/* Map pin icon */}
             <svg
               className="w-4 h-4"
@@ -216,27 +216,27 @@ export default function EventCard({
 
         {/* Status badges */}
         <div className="flex items-center gap-2 mt-3 flex-wrap">
-          {/* Price badge - Free (green) or Paid with £ (blue) */}
+          {/* Price badge - Free (green) or Paid (amber) */}
           {event.price && (
             event.price.toLowerCase() === "free" ? (
-              <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded font-medium">
+              <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-medium">
                 Free
               </span>
             ) : (
-              <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded font-medium">
+              <span className="text-xs bg-orange-500/10 text-orange-400 px-2 py-1 rounded font-medium">
                 £{event.price.replace(/[£$]/g, "")}
               </span>
             )
           )}
           {/* "In Calendar" badge - shown when synced to Google Calendar */}
           {event.googleEventId && (
-            <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded">
+            <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded">
               In Calendar
             </span>
           )}
           {/* "Past Event" badge - shown for events that have already occurred */}
           {!isUpcoming && (
-            <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded">
+            <span className="text-xs bg-white/[0.04] text-gray-500 px-2 py-1 rounded">
               Past Event
             </span>
           )}
