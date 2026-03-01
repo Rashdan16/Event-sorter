@@ -8,25 +8,30 @@ interface Message {
   content: string;
 }
 
-export default function ChatBot() {
+interface ChatBotProps {
+  sessionId?: string;
+  initialMessages?: Message[];
+  readOnly?: boolean;
+}
+
+export default function ChatBot({ sessionId: existingSessionId, initialMessages, readOnly }: ChatBotProps) {
   const router = useRouter();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages || []);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [creatingEvent, setCreatingEvent] = useState(false);
   const [eventCreated, setEventCreated] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(existingSessionId || null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasSentGreeting = useRef(false);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send initial greeting on mount
   useEffect(() => {
-    if (hasSentGreeting.current) return;
+    if (hasSentGreeting.current || initialMessages) return;
     hasSentGreeting.current = true;
 
     setMessages([
@@ -37,7 +42,43 @@ export default function ChatBot() {
       },
     ]);
     inputRef.current?.focus();
-  }, []);
+  }, [initialMessages]);
+
+  const saveSession = async (allMessages: Message[], eventId?: string) => {
+    try {
+      if (!sessionId) {
+        const userMsg = allMessages.find((m) => m.role === "user");
+        const title = userMsg
+          ? userMsg.content.length > 50
+            ? userMsg.content.substring(0, 50) + "..."
+            : userMsg.content
+          : "New Chat";
+
+        const res = await fetch("/api/chat-sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, messages: allMessages }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setSessionId(data.id);
+        }
+      } else {
+        const newMessages = sessionId ? allMessages.slice(-2) : allMessages;
+        await fetch(`/api/chat-sessions/${sessionId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: newMessages,
+            ...(eventId ? { eventId } : {}),
+          }),
+        });
+      }
+    } catch (error) {
+      console.error("Error saving chat session:", error);
+    }
+  };
 
   const sendMessage = async () => {
     const trimmed = input.trim();
@@ -59,22 +100,17 @@ export default function ChatBot() {
       const data = await res.json();
 
       if (data.eventData) {
-        // AI has gathered all info — create the event
-        // Show the AI's confirmation message (strip the JSON block)
         const cleanMessage = data.message
           .replace(/```json[\s\S]*?```/, "")
           .trim();
 
+        const newMessages: Message[] = [];
         if (cleanMessage) {
-          setMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: cleanMessage },
-          ]);
+          newMessages.push({ role: "assistant", content: cleanMessage });
         }
 
         setCreatingEvent(true);
 
-        // Create the event via the events API
         const eventRes = await fetch("/api/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -84,37 +120,39 @@ export default function ChatBot() {
         if (eventRes.ok) {
           const event = await eventRes.json();
           setEventCreated(event.id);
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content: "Your event has been created! You can view it on your dashboard or click the button below.",
-            },
-          ]);
+          const successMsg: Message = {
+            role: "assistant",
+            content: "Your event has been created! You can view it on your dashboard or click the button below.",
+          };
+          newMessages.push(successMsg);
+          setMessages((prev) => [...prev, ...newMessages]);
+
+          await saveSession([...updatedMessages, ...newMessages], event.id);
         } else {
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content: "Sorry, there was an error creating your event. Please try again.",
-            },
-          ]);
+          const errorMsg: Message = {
+            role: "assistant",
+            content: "Sorry, there was an error creating your event. Please try again.",
+          };
+          newMessages.push(errorMsg);
+          setMessages((prev) => [...prev, ...newMessages]);
+
+          await saveSession([...updatedMessages, ...newMessages]);
         }
         setCreatingEvent(false);
       } else if (data.message) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: data.message },
-        ]);
+        const assistantMsg: Message = { role: "assistant", content: data.message };
+        setMessages((prev) => [...prev, assistantMsg]);
+
+        await saveSession([...updatedMessages, assistantMsg]);
       }
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
-        },
-      ]);
+      const errorMsg: Message = {
+        role: "assistant",
+        content: "Sorry, something went wrong. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+
+      await saveSession([...messages, userMessage, errorMsg]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
@@ -191,7 +229,7 @@ export default function ChatBot() {
       )}
 
       {/* Input Area */}
-      {!eventCreated && (
+      {!eventCreated && !readOnly && (
         <div className="px-4 pb-4 pt-2 border-t border-gray-200 dark:border-gray-700">
           <div className="flex gap-3">
             <input

@@ -166,12 +166,12 @@ export default function EventCard({
       {/* Event details section */}
       <div className="p-4">
         {/* Event name/title */}
-        <h3 className="font-semibold text-lg text-white mb-1">
+        <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
           {event.name}
         </h3>
 
         {/* Date and time row with calendar icon */}
-        <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
           {/* Calendar icon */}
           <svg
             className="w-4 h-4"
@@ -196,7 +196,7 @@ export default function EventCard({
 
         {/* Location row with map pin icon (if available) */}
         {event.location && (
-          <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
             {/* Map pin icon */}
             <svg
               className="w-4 h-4"

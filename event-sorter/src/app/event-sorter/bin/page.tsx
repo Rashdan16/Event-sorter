@@ -165,7 +165,7 @@ export default function BinPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -173,9 +173,9 @@ export default function BinPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200 flex items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-white">Please sign in to view your bin</h1>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Please sign in to view your bin</h1>
           <Link href="/auth/signin" className="text-orange-400 hover:text-orange-300 mt-4 inline-block transition-colors duration-200">
             Sign in
           </Link>
@@ -185,14 +185,14 @@ export default function BinPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Link
               href="/event-sorter"
-              className="text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors duration-200"
+              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1 transition-colors duration-200"
             >
               <svg
                 className="w-5 h-5"
@@ -209,7 +209,7 @@ export default function BinPage() {
               </svg>
               Back
             </Link>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Bin</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Bin</h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -220,13 +220,13 @@ export default function BinPage() {
                     setSelectionMode(true);
                     setSelectedIds(new Set(events.map((e) => e.id)));
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-400 bg-white/[0.04] border border-white/[0.06] rounded-lg hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all duration-200"
                 >
                   Select All
                 </button>
                 <button
                   onClick={() => setSelectionMode(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-400 bg-white/[0.04] border border-white/[0.06] rounded-lg hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all duration-200"
                 >
                   Select
                 </button>
@@ -259,7 +259,7 @@ export default function BinPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={cancelSelection}
-                className="px-4 py-2 text-gray-400 bg-white/[0.04] border border-white/[0.06] rounded-lg hover:bg-white/[0.08] transition-all duration-200"
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-all duration-200"
               >
                 Cancel
               </button>
@@ -327,7 +327,7 @@ export default function BinPage() {
                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
               />
             </svg>
-            <h3 className="text-lg font-medium text-white mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Bin is empty
             </h3>
             <p className="text-gray-500 mb-6">
@@ -396,7 +396,7 @@ export default function BinPage() {
                     )}
 
                     {event.imageUrl && (
-                      <div className="h-48 bg-white/[0.02] overflow-hidden flex items-center justify-center">
+                      <div className="h-48 bg-gray-50 dark:bg-white/[0.02] overflow-hidden flex items-center justify-center">
                         <img
                           src={event.imageUrl}
                           alt={event.name}
@@ -406,11 +406,11 @@ export default function BinPage() {
                     )}
 
                     <div className="p-4">
-                      <h3 className="font-semibold text-lg text-white mb-1">
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
                         {event.name}
                       </h3>
 
-                      <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
                         <svg
                           className="w-4 h-4"
                           fill="none"
@@ -432,7 +432,7 @@ export default function BinPage() {
                       </div>
 
                       {event.location && (
-                        <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
                           <svg
                             className="w-4 h-4"
                             fill="none"

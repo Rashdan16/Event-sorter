@@ -167,7 +167,7 @@ export default function EventSorterHome() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -175,16 +175,16 @@ export default function EventSorterHome() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200 flex items-center justify-center px-4 relative overflow-hidden">
         <div className="aurora-bg">
           <div className="aurora-orb" />
         </div>
         <div className="absolute inset-0 dot-grid pointer-events-none" />
         <div className="relative z-10 text-center max-w-2xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
             Event Sorter
           </h1>
-          <p className="text-lg text-gray-400 mb-10 leading-relaxed">
+          <p className="text-lg text-gray-500 dark:text-gray-400 mb-10 leading-relaxed">
             Upload event posters and let AI extract the details. Organize your
             upcoming events and sync them to your Google Calendar.
           </p>
@@ -200,14 +200,14 @@ export default function EventSorterHome() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors duration-200"
+              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1 transition-colors duration-200"
             >
               <svg
                 className="w-5 h-5"
@@ -224,13 +224,13 @@ export default function EventSorterHome() {
               </svg>
               Back
             </Link>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Your Events</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Your Events</h1>
           </div>
           <div className="flex items-center gap-3">
             {events.length > 0 && !selectionMode && (
               <button
                 onClick={() => setSelectionMode(true)}
-                className="flex items-center gap-2 px-4 py-2 text-gray-400 bg-white/[0.04] border border-white/[0.06] rounded-lg hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all duration-200"
               >
                 <svg
                   className="w-5 h-5"
@@ -250,7 +250,7 @@ export default function EventSorterHome() {
             )}
             <Link
               href="/event-sorter/chat"
-              className="flex items-center gap-2 px-4 py-2 text-gray-400 bg-white/[0.04] border border-white/[0.06] rounded-lg hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all duration-200"
             >
               <svg
                 className="w-5 h-5"
@@ -269,7 +269,7 @@ export default function EventSorterHome() {
             </Link>
             <Link
               href="/event-sorter/bin"
-              className="flex items-center gap-2 px-4 py-2 text-gray-400 bg-white/[0.04] border border-white/[0.06] rounded-lg hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all duration-200"
             >
               <svg
                 className="w-5 h-5"
@@ -298,13 +298,13 @@ export default function EventSorterHome() {
         {/* Time filter */}
         {events.length > 0 && !selectionMode && (
           <div className="flex items-center mb-4">
-            <div className="group flex rounded-lg border border-white/[0.06] overflow-hidden">
+            <div className="group flex rounded-lg border border-gray-200 dark:border-white/[0.06] overflow-hidden">
               <button
                 onClick={() => setTimeFilter("all")}
                 className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
                   timeFilter === "all"
                     ? "bg-orange-500 text-white"
-                    : "bg-white/[0.03] text-gray-400 hover:bg-white/[0.06]"
+                    : "bg-gray-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06]"
                 }`}
               >
                 {timeFilterLabel}
@@ -312,40 +312,40 @@ export default function EventSorterHome() {
               <div className="flex overflow-hidden max-w-0 group-hover:max-w-[500px] transition-all duration-500 ease-out">
                 <button
                   onClick={() => setTimeFilter("day")}
-                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-white/[0.06] transition-all duration-200 ${
+                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-gray-200 dark:border-white/[0.06] transition-all duration-200 ${
                     timeFilter === "day"
                       ? "bg-orange-500 text-white"
-                      : "bg-white/[0.03] text-gray-400 hover:bg-white/[0.06]"
+                      : "bg-gray-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06]"
                   }`}
                 >
                   Today
                 </button>
                 <button
                   onClick={() => setTimeFilter("week")}
-                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-white/[0.06] transition-all duration-200 ${
+                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-gray-200 dark:border-white/[0.06] transition-all duration-200 ${
                     timeFilter === "week"
                       ? "bg-orange-500 text-white"
-                      : "bg-white/[0.03] text-gray-400 hover:bg-white/[0.06]"
+                      : "bg-gray-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06]"
                   }`}
                 >
                   This Week
                 </button>
                 <button
                   onClick={() => setTimeFilter("nextweek")}
-                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-white/[0.06] transition-all duration-200 ${
+                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-gray-200 dark:border-white/[0.06] transition-all duration-200 ${
                     timeFilter === "nextweek"
                       ? "bg-orange-500 text-white"
-                      : "bg-white/[0.03] text-gray-400 hover:bg-white/[0.06]"
+                      : "bg-gray-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06]"
                   }`}
                 >
                   Next Week
                 </button>
                 <button
                   onClick={() => setTimeFilter("month")}
-                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-white/[0.06] transition-all duration-200 ${
+                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-l border-gray-200 dark:border-white/[0.06] transition-all duration-200 ${
                     timeFilter === "month"
                       ? "bg-orange-500 text-white"
-                      : "bg-white/[0.03] text-gray-400 hover:bg-white/[0.06]"
+                      : "bg-gray-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06]"
                   }`}
                 >
                   This Month
@@ -384,12 +384,12 @@ export default function EventSorterHome() {
                 }
               }}
               autoComplete="off"
-              className="w-full pl-10 pr-10 py-3 border border-white/[0.06] rounded-lg bg-white/[0.03] text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all duration-200 outline-none"
+              className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-white/[0.06] rounded-lg bg-white dark:bg-white/[0.03] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all duration-200 outline-none"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300 transition-colors duration-200"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
               >
                 <svg
                   className="w-5 h-5"
@@ -441,7 +441,7 @@ export default function EventSorterHome() {
             <div className="flex items-center gap-3">
               <button
                 onClick={cancelSelection}
-                className="px-4 py-2 text-gray-400 bg-white/[0.04] border border-white/[0.06] rounded-lg hover:bg-white/[0.08] transition-all duration-200"
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-all duration-200"
               >
                 Cancel
               </button>
@@ -494,7 +494,7 @@ export default function EventSorterHome() {
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <h3 className="text-lg font-medium text-white mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No events yet
             </h3>
             <p className="text-gray-500 mb-6">
@@ -522,7 +522,7 @@ export default function EventSorterHome() {
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-            <h3 className="text-lg font-medium text-white mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No events found
             </h3>
             <p className="text-gray-500 mb-6">
@@ -539,7 +539,7 @@ export default function EventSorterHome() {
               {timeFilter !== "all" && (
                 <button
                   onClick={() => setTimeFilter("all")}
-                  className="inline-block bg-white/[0.04] border border-white/[0.06] text-gray-400 px-6 py-2 rounded-lg hover:bg-white/[0.08] transition-all duration-200"
+                  className="inline-block bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] text-gray-600 dark:text-gray-400 px-6 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-all duration-200"
                 >
                   Show All Events
                 </button>
@@ -547,7 +547,7 @@ export default function EventSorterHome() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="inline-block bg-white/[0.04] border border-white/[0.06] text-gray-400 px-6 py-2 rounded-lg hover:bg-white/[0.08] transition-all duration-200"
+                  className="inline-block bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] text-gray-600 dark:text-gray-400 px-6 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-all duration-200"
                 >
                   Clear Search
                 </button>
@@ -564,7 +564,7 @@ export default function EventSorterHome() {
 
             {upcomingEvents.length > 0 && (
               <section className="mb-12">
-                <h2 className="text-lg font-semibold text-gray-400 mb-4">
+                <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-4">
                   Upcoming Events ({upcomingEvents.length})
                 </h2>
                 <div className="flex gap-6 overflow-x-auto pt-4 pb-4 pl-2 scrollbar-thin scroll-fade">

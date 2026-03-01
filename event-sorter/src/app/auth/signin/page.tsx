@@ -66,7 +66,7 @@ export default function SignInPage() {
   // Show loading spinner while checking authentication status
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -77,7 +77,7 @@ export default function SignInPage() {
   // ============================================
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200 flex items-center justify-center px-4 relative overflow-hidden">
       {/* Aurora ambient glow */}
       <div className="aurora-bg">
         <div className="aurora-orb" />
@@ -91,16 +91,16 @@ export default function SignInPage() {
         <div className="glass-card rounded-2xl p-10 text-center">
           {/* Logo */}
           <div className="mb-8">
-            <span className="text-3xl font-bold text-white tracking-tight">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
               RK<span className="text-orange-400">.</span>
             </span>
           </div>
 
           {/* Welcome Message */}
-          <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
             Welcome to RK Solutions
           </h1>
-          <p className="text-gray-400 mb-10 leading-relaxed">
+          <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed">
             Sign in with your Google account to start organizing your events
           </p>
 
@@ -109,7 +109,7 @@ export default function SignInPage() {
           {/* callbackUrl specifies where to redirect after successful auth */}
           <button
             onClick={() => signIn("google", { callbackUrl: "/" })}
-            className="w-full flex items-center justify-center gap-3 bg-white/[0.04] border border-white/[0.08] text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-white/[0.08] hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-3 bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] text-gray-900 dark:text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/[0.08] hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5 transition-all duration-200"
           >
             {/* Google "G" Logo - Multi-colored SVG */}
             <svg className="w-5 h-5" viewBox="0 0 24 24">

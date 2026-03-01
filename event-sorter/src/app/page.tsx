@@ -39,7 +39,7 @@ export default function Dashboard() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] flex items-center justify-center transition-colors duration-200">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -47,7 +47,7 @@ export default function Dashboard() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] text-gray-900 dark:text-white overflow-hidden transition-colors duration-200">
         {/* ===== HERO SECTION ===== */}
         <section className="relative min-h-[90vh] flex items-center justify-center px-4 dot-grid">
           {/* Aurora ambient glow */}
@@ -64,11 +64,11 @@ export default function Dashboard() {
             }}
           >
             <h1 className="hero-fade text-5xl sm:text-6xl md:text-8xl font-bold tracking-tight mb-6">
-              <span className="bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-b from-gray-900 to-gray-400 dark:from-white dark:to-gray-500 bg-clip-text text-transparent">
                 RK Solutions
               </span>
             </h1>
-            <p className="hero-fade-d1 text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="hero-fade-d1 text-lg md:text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
               A collection of tools to help you stay organized. Sign in to get started.
             </p>
             <div className="hero-fade-d2">
@@ -112,7 +112,7 @@ export default function Dashboard() {
         <div className="section-glow-border" />
         <section className="relative px-4 py-24 max-w-6xl mx-auto">
           <div className="reveal text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
               Everything you need
             </h2>
             <p className="text-gray-500 text-lg">Powerful tools, beautifully simple.</p>
@@ -136,8 +136,8 @@ export default function Dashboard() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-white">Event Sorter</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Event Sorter</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
                 Upload event posters and let AI extract the details. Sync to Google Calendar.
               </p>
             </div>
@@ -159,8 +159,8 @@ export default function Dashboard() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-white">Financial Helper</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Financial Helper</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
                 Tools to help manage your finances.
               </p>
             </div>
@@ -182,8 +182,8 @@ export default function Dashboard() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-white">Jobs</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Jobs</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
                 Browse and manage job opportunities.
               </p>
             </div>
@@ -196,15 +196,15 @@ export default function Dashboard() {
           <div className="max-w-4xl mx-auto">
             <div className="reveal grid grid-cols-3 gap-8 text-center">
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">500+</div>
+                <div className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">500+</div>
                 <div className="text-gray-500 text-sm uppercase tracking-widest">Events Organized</div>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">99%</div>
+                <div className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">99%</div>
                 <div className="text-gray-500 text-sm uppercase tracking-widest">AI Accuracy</div>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">10x</div>
+                <div className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">10x</div>
                 <div className="text-gray-500 text-sm uppercase tracking-widest">Time Saved</div>
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function Dashboard() {
         {/* ===== FOOTER ===== */}
         <div className="section-glow-border" />
         <footer className="px-4 py-8">
-          <div className="max-w-6xl mx-auto text-center text-gray-600 text-sm">
+          <div className="max-w-6xl mx-auto text-center text-gray-500 dark:text-gray-600 text-sm">
             Built with precision. &copy; {new Date().getFullYear()} RK Solutions.
           </div>
         </footer>
@@ -224,10 +224,10 @@ export default function Dashboard() {
 
   /* ===== AUTHENTICATED DASHBOARD ===== */
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#0a0a0a] transition-colors duration-200">
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">RK Solutions</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">RK Solutions</h1>
           <p className="text-gray-500">Your tools and products</p>
         </div>
 
@@ -252,10 +252,10 @@ export default function Dashboard() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-white mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Event Sorter
             </h2>
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
               Upload event posters, extract details with AI, and sync to Google Calendar.
             </p>
             <div className="mt-5 flex items-center text-orange-400 text-sm font-medium">
@@ -296,10 +296,10 @@ export default function Dashboard() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-white mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Financial Helper
             </h2>
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
               Tools to help manage your finances.
             </p>
             <div className="mt-5 flex items-center text-orange-400 text-sm font-medium">
@@ -340,10 +340,10 @@ export default function Dashboard() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-white mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Jobs
             </h2>
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
               Browse and manage job opportunities.
             </p>
             <div className="mt-5 flex items-center text-orange-400 text-sm font-medium">
