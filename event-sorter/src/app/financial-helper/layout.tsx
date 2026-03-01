@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Link from "next/link";
 import { FinanceDataProvider } from "@/hooks/useFinanceData";
 import Sidebar from "@/components/financial-helper/Sidebar";
 import AISignalPanel from "@/components/financial-helper/AISignalPanel";
@@ -61,6 +62,19 @@ export default function FinancialHelperLayout({
 
           {/* Main content - scrollable */}
           <main className="flex-1 min-w-0 overflow-y-auto h-screen fin-scrollbar">
+            {/* Mobile back button - visible only when sidebar is hidden */}
+            <div className="block min-[860px]:hidden px-4 pt-4">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-[#7a7e8f] hover:bg-[#13161e] hover:text-[#b0b3c0] transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5" />
+                  <path d="M12 19l-7-7 7-7" />
+                </svg>
+                Back to Home
+              </Link>
+            </div>
             {children}
           </main>
 

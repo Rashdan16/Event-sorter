@@ -17,6 +17,7 @@ interface Event {
   price?: string | null;
   imageUrl?: string | null;
   googleEventId?: string | null;
+  completed?: boolean;
 }
 
 export default function EventSorterHome() {

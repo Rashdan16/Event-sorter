@@ -69,5 +69,6 @@ export interface Event {
   price?: string | null;             // Event price ("Free", "$10", etc.)
   imageUrl?: string | null;          // Event poster image URL
   googleEventId?: string | null;     // Google Calendar event ID (if synced)
+  completed?: boolean;               // Whether the event has been completed
   deletedAt?: string | null;         // Soft delete timestamp (null = not deleted)
 }

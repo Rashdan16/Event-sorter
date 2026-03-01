@@ -18,6 +18,7 @@ interface Event {
   price?: string | null;
   imageUrl?: string | null;
   googleEventId?: string | null;
+  completed?: boolean;
 }
 
 export default function EventPage() {
@@ -31,6 +32,7 @@ export default function EventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [togglingCompleted, setTogglingCompleted] = useState(false);
 
   useEffect(() => {
     if (session && eventId) {
@@ -166,6 +168,39 @@ export default function EventPage() {
     }
   };
 
+  const toggleCompleted = async () => {
+    setTogglingCompleted(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...event,
+          date: event.date.split("T")[0],
+          endDate: event.endDate ? event.endDate.split("T")[0] : null,
+          completed: !event.completed,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update event");
+      }
+
+      const updatedEvent = await response.json();
+      setEvent(updatedEvent);
+      setSuccessMessage(
+        updatedEvent.completed ? "Event marked as completed!" : "Event marked as incomplete."
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update event");
+    } finally {
+      setTogglingCompleted(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -208,6 +243,45 @@ export default function EventPage() {
           {successMessage}
         </div>
       )}
+
+      {/* Completed toggle */}
+      <div className="mb-6">
+        <button
+          onClick={toggleCompleted}
+          disabled={togglingCompleted}
+          className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border transition-all duration-200 ${
+            event.completed
+              ? "bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/15"
+              : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+          } ${togglingCompleted ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
+                event.completed
+                  ? "bg-emerald-500 border-emerald-500"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            >
+              {event.completed && (
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            <span className={`text-sm font-medium ${
+              event.completed
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-gray-700 dark:text-gray-300"
+            }`}>
+              {event.completed ? "Event Completed" : "Mark as Completed"}
+            </span>
+          </div>
+          {togglingCompleted && (
+            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+          )}
+        </button>
+      </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h1 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">Edit Event</h1>

@@ -122,6 +122,7 @@ export async function PUT(
         price: data.price,
         imageUrl: data.imageUrl,
         googleEventId: data.googleEventId, // Google Calendar event ID if synced
+        completed: data.completed,
       },
     });
 

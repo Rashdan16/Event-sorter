@@ -146,6 +146,13 @@ export default function BinPage() {
     });
   };
 
+  const formatTime = (time: string) => {
+    const [h, m] = time.split(":").map(Number);
+    const period = h >= 12 ? "PM" : "AM";
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${m.toString().padStart(2, "0")} ${period}`;
+  };
+
   const formatDeletedAt = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
@@ -421,7 +428,7 @@ export default function BinPage() {
                           {formatDate(eventDate)}
                           {event.endDate && ` - ${formatDate(new Date(event.endDate))}`}
                         </span>
-                        {event.time && <span>at {event.time}</span>}
+                        {event.time && <span>at {formatTime(event.time)}</span>}
                       </div>
 
                       {event.location && (

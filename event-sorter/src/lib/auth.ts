@@ -80,6 +80,28 @@ export const authOptions: NextAuthOptions = {
    */
   callbacks: {
     /**
+     * Sign In Callback
+     * Runs on every sign-in. Updates stored OAuth tokens with fresh ones
+     * so that revoked/expired refresh tokens get replaced automatically.
+     */
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && account.access_token) {
+        await prisma.account.updateMany({
+          where: {
+            userId: user.id,
+            provider: "google",
+          },
+          data: {
+            access_token: account.access_token,
+            refresh_token: account.refresh_token ?? undefined,
+            expires_at: account.expires_at,
+          },
+        });
+      }
+      return true;
+    },
+
+    /**
      * Session Callback
      * Runs whenever a session is checked (on every authenticated request).
      * We use this to add the user's database ID to the session object,

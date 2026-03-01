@@ -35,6 +35,7 @@ interface Event {
   price?: string | null;           // Event price (optional, e.g., "Free", "$10")
   imageUrl?: string | null;        // Poster image URL (optional)
   googleEventId?: string | null;   // Google Calendar ID if synced (optional)
+  completed?: boolean;              // Whether the event has been completed
 }
 
 /**
@@ -79,6 +80,13 @@ export default function EventCard({
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  const formatTime = (time: string) => {
+    const [h, m] = time.split(":").map(Number);
+    const period = h >= 12 ? "PM" : "AM";
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${m.toString().padStart(2, "0")} ${period}`;
   };
 
   /**
@@ -183,7 +191,7 @@ export default function EventCard({
             {event.endDate && ` - ${formatDate(new Date(event.endDate))}`}
           </span>
           {/* Show time if available */}
-          {event.time && <span>at {event.time}</span>}
+          {event.time && <span>at {formatTime(event.time)}</span>}
         </div>
 
         {/* Location row with map pin icon (if available) */}
@@ -227,6 +235,12 @@ export default function EventCard({
                 £{event.price.replace(/[£$]/g, "")}
               </span>
             )
+          )}
+          {/* "Completed" badge */}
+          {event.completed && (
+            <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-medium">
+              Completed
+            </span>
           )}
           {/* "In Calendar" badge - shown when synced to Google Calendar */}
           {event.googleEventId && (

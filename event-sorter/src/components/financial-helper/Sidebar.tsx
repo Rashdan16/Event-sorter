@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const navSections = [
   {
@@ -35,8 +36,22 @@ export default function Sidebar() {
         background: "#0a0d14",
       }}
     >
+      {/* Back button */}
+      <div className="px-3 pt-4">
+        <Link
+          href="/"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-[#7a7e8f] hover:bg-[#13161e] hover:text-[#b0b3c0] transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          Back to Home
+        </Link>
+      </div>
+
       {/* Logo */}
-      <div className="px-5 pt-6 pb-4">
+      <div className="px-5 pt-3 pb-4">
         <h1
           className="text-xl font-extrabold italic"
           style={{ fontFamily: "'Outfit', sans-serif", color: "#e8872a" }}

@@ -29,33 +29,14 @@ export default function ChatBot() {
     if (hasSentGreeting.current) return;
     hasSentGreeting.current = true;
 
-    const greet = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: [{ role: "user", content: "Hi, I want to create an event." }],
-          }),
-        });
-        const data = await res.json();
-        if (data.message) {
-          setMessages([{ role: "assistant", content: data.message }]);
-        }
-      } catch {
-        setMessages([
-          {
-            role: "assistant",
-            content: "Hey! I can help you create an event. What event or reminder would you like to add?",
-          },
-        ]);
-      } finally {
-        setLoading(false);
-        inputRef.current?.focus();
-      }
-    };
-    greet();
+    setMessages([
+      {
+        role: "assistant",
+        content:
+          "What event do you want to add? Include the name, date, and any other details in one message and I'll create it instantly.",
+      },
+    ]);
+    inputRef.current?.focus();
   }, []);
 
   const sendMessage = async () => {
@@ -219,7 +200,7 @@ export default function ChatBot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={loading ? "Waiting for response..." : "Type your message..."}
+              placeholder={loading ? "Waiting for response..." : "e.g. Dinner with Jake tomorrow at 7pm at Nandos"}
               disabled={loading || creatingEvent}
               className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition disabled:opacity-50"
             />
