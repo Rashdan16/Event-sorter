@@ -1,39 +1,32 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import Header from "@/components/financial-helper/Header";
+import StatCards from "@/components/financial-helper/StatCards";
+import PriceRangeBar from "@/components/financial-helper/PriceRangeBar";
+import TradingViewChart from "@/components/financial-helper/TradingViewChart";
 
-export default function FinancialHelper() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    }
-  }, [status, router]);
-
-  if (status === "loading") {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) return null;
-
+export default function FinancialHelperPage() {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        Financial Helper
-      </h1>
-      <p className="text-gray-600 dark:text-gray-300 mb-8">
-        Coming soon.
-      </p>
+    <div className="p-6 space-y-6 max-w-[1200px]">
+      {/* Header */}
+      <div className="fin-fade-up">
+        <Header />
+      </div>
+
+      {/* Stat Cards */}
+      <div className="fin-fade-up d1">
+        <StatCards />
+      </div>
+
+      {/* Price Range Bar */}
+      <div className="fin-fade-up d2">
+        <PriceRangeBar />
+      </div>
+
+      {/* TradingView Chart */}
+      <div className="fin-fade-up d3">
+        <TradingViewChart />
+      </div>
     </div>
   );
 }

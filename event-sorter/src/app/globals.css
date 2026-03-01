@@ -330,3 +330,93 @@ html, body, *, *::before, *::after {
   transform: translate(-50%, -50%);
   transition: width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
 }
+
+/* ============================================
+   FINHELPER — SHIMMER LOADING SKELETON
+   ============================================ */
+
+@keyframes fin-shimmer-move {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.fin-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #1c1f28;
+  border-radius: 8px;
+}
+
+.fin-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: fin-shimmer-move 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   FINHELPER — FADE-UP ENTRANCE ANIMATIONS
+   ============================================ */
+
+@keyframes finFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fin-fade-up {
+  opacity: 0;
+  animation: finFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fin-fade-up.d1 { animation-delay: 0.05s; }
+.fin-fade-up.d2 { animation-delay: 0.1s; }
+.fin-fade-up.d3 { animation-delay: 0.15s; }
+.fin-fade-up.d4 { animation-delay: 0.2s; }
+.fin-fade-up.d5 { animation-delay: 0.25s; }
+.fin-fade-up.d6 { animation-delay: 0.3s; }
+
+/* ============================================
+   FINHELPER — LIVE INDICATOR PULSE
+   ============================================ */
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.6); }
+}
+
+.live-pulse {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   FINHELPER — DARK SCROLLBAR
+   ============================================ */
+
+.fin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #22252e #0d1017;
+}
+
+.fin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fin-scrollbar::-webkit-scrollbar-track {
+  background: #0d1017;
+}
+
+.fin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #22252e;
+  border-radius: 3px;
+}
+
+.fin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #2e323e;
+}

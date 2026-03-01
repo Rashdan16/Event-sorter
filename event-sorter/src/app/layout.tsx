@@ -20,7 +20,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import Navbar from "@/components/Navbar";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 
 /**
  * Font Configuration
@@ -178,8 +178,8 @@ export default function RootLayout({
       >
         {/* Providers wrap the app with context (auth, theme) */}
         <Providers>
-          {/* Navbar appears on every page */}
-          <Navbar />
+          {/* Navbar appears on every page except /financial-helper */}
+          <ConditionalNavbar />
           {/* Main content area - children is the current page */}
           <main>{children}</main>
         </Providers>
